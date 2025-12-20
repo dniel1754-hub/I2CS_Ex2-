@@ -167,12 +167,32 @@ public class Map implements Map2D, Serializable{
 
     @Override
     public void mul(double scalar) {
+        for (int i =0;i<this.getWidth();i++){
+            for (int j =0;j<this.getHeight();j++){
+               double multy = this.map[i][j]* scalar;
+               this.map[i][j] = (int) multy;
+            }
+        }
 
 
     }
 
     @Override
     public void rescale(double sx, double sy) {
+        if (sx< 0.0 || sy<0.0 ){
+            throw new RuntimeException();
+        }
+        int w = (int) (this.getWidth() * sx);
+        int h = (int) (this.getHeight() * sy);
+        setMap(w,h);
+
+
+
+
+    }
+    public void setMap(int w,int h){
+
+        this.map = new int[w][h];
 
     }
 
