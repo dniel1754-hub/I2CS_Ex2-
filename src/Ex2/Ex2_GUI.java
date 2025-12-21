@@ -1,5 +1,7 @@
 package Ex2;
 
+import java.awt.*;
+
 /**
  * Intro2CS_2026A
  * This class represents a Graphical User Interface (GUI) for Map2D.
@@ -10,6 +12,16 @@ package Ex2;
  *
  */
 public class Ex2_GUI {
+    private static final Color[] PALETTE = {
+            StdDraw.WHITE, // אינדקס 0
+            StdDraw.BLACK,// אינדקס 1
+            StdDraw.GRAY,// אינדקס 2
+            StdDraw.GREEN,// אינדקס 3
+            StdDraw.ORANGE,// אינדקס 4
+            StdDraw.YELLOW,// אינדקס 5
+            StdDraw.RED,   // אינדקס 6
+            StdDraw.BLUE   // אינדקס 7
+    };
     public static void drawMap(Map2D map) {
         //
     }

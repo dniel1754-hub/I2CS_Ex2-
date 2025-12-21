@@ -1,5 +1,7 @@
 package Ex2;
+import java.awt.*;
 import java.io.Serializable;
+
 /**
  * This class represents a 2D map (int[w][h]) as a "screen" or a raster matrix or maze over integers.
  * This is the main class needed to be implemented.
@@ -7,10 +9,14 @@ import java.io.Serializable;
  * @author boaz.benmoshe
  *
  */
+
+
+
 public class Map implements Map2D, Serializable{
 
 
     private int [][] map;
+
 
     // edit this class below
 	/**
@@ -46,6 +52,7 @@ public class Map implements Map2D, Serializable{
             for (int i =0;i<array.length;i++){
                 for (int j =0;j<array[0].length;j++){
                     array[i][j] = v;
+
 
                 }
 
@@ -198,11 +205,59 @@ public class Map implements Map2D, Serializable{
 
     @Override
     public void drawCircle(Pixel2D center, double rad, int color) {
+        for (int i =0; i< map.length;i++){
+            for (int j =0;j<map[0].length;j++) {
+                Pixel2D current = new Index2D(i,j);
+                if (current.distance2D(center) <= rad)
+                    setPixel(i,j,color);
+            }
+        }
 
     }
 
     @Override
     public void drawLine(Pixel2D p1, Pixel2D p2, int color) {
+        if (!isInside(p1) || !isInside(p2))
+            throw new RuntimeException();
+        if (p2 == p1)
+            setPixel(p1,color);
+        int dx =Math.abs( p1.getX() - p2.getX());
+        int dy = Math.abs(p1.getY() - p2.getY());
+        double m = 0.0;
+        if (dx >= dy ){
+            if (p1.getX()>p2.getX())
+                 drawLine(p2,p1,color);
+            else {
+
+                if (dx != 0)
+                    m = (double) dy / dx;
+                for (int x = p1.getX(); x <= p2.getX(); x++) {
+                    double y = (int) p1.getY() + m * (x - p1.getX());
+                    setPixel(x,(int)Math.round(y),color );
+                }
+            }
+
+        }
+        else {
+            if (p1.getY()>p2.getY())
+                drawLine(p2,p1,color);
+            else {
+                if (dy != 0)
+                    m = (double) dx/dy;
+                for (int y=p1.getY();y <=p2.getY();y++){
+                    double x = p1.getX() +m*(y-p1.getY());
+                    setPixel((int) Math.round(x),y,color);
+
+                }
+
+
+
+            }
+
+
+        }
+
+
 
     }
 

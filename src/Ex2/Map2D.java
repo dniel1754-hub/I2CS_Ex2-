@@ -114,24 +114,26 @@ public interface Map2D {
      */
     void drawCircle(Pixel2D center, double rad, int newColor);
     /**
-     * This method draws a line by changing the pixels between p1 to p2 to the newColor.
-     * assuming dx = |p2.x-p1.x|, dy = |p2.y-p1.y|, and both p1 and p2 are within this map.
-     * Note:
-     * 1. if p1 equals p2 - a single pixel will be drawn.
-     * 2. assuming dx>=dy & p1.x<p2.x: dx+1 pixels will be drawn.
-     * let f(x) be the linear function going throw p1&p2.
-     * let x=p1.x, p1.x+1, p1.x+2...p1.x+dx (=p2.x)
-     * all the pixels (x,round(f(x)) will be drawn.
-     * 3. assuming dx>=dy & p1.x>p2.x: the line p2,p1 will be drawn.
-     * 4. assuming dx<dy & p1.y<p2.y: dy+1 pixels will be drawn.
-     * let g(y) be the linear function going throw p1&p2.
-     * let y=p1.y, p1.y+1, p1.y+2...p1.y+dy (=p2.y)
-     * all the pixels (y,round(g(y)) will be drawn.
-     * 5. assuming dy>dx & p1.y>p2.y: the line p2,p1 will be drawn.
-     * @param p1
-     * @param p2
-     * @param newColor - the (new) color to be used in the drawing.
-     */
+     * /**
+     *      * This method draws a line by changing the pixels between p1 to p2 to the newColor.
+     *      * assuming dx = |p2.x-p1.x|, dy = |p2.y-p1.y|, and both p1 and p2 are within this map.
+     *      * Note:
+     *      * 1. if p1 equals p2 - a single pixel will be drawn.
+     *      * 2. assuming dx>=dy & p1.x<p2.x: dx+1 pixels will be drawn.
+     *      * let f(x) be the linear function going throw p1&p2.
+     *      * let x=p1.x, p1.x+1, p1.x+2...p1.x+dx (=p2.x)
+     *      * all the pixels (x,round(f(x)) will be drawn.
+     *      * 3. assuming dx>=dy & p1.x>p2.x: the line p2,p1 will be drawn.
+     *      * 4. assuming dx<dy & p1.y<p2.y: dy+1 pixels will be drawn.
+     *      * let g(y) be the linear function going throw p1&p2.
+     *      * let y=p1.y, p1.y+1, p1.y+2...p1.y+dy (=p2.y)
+     *      * all the pixels (y,round(g(y)) will be drawn.
+     *      * 5. assuming dy>dx & p1.y>p2.y: the line p2,p1 will be drawn.
+     *      * @param p1
+     *      * @param p2
+     *      * @param newColor - the (new) color to be used in the drawing.
+     *      */
+
     void drawLine(Pixel2D p1, Pixel2D p2, int newColor);
     /**
      * This method draws a rectangle by changing all the pixels in this map
