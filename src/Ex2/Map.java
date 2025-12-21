@@ -247,29 +247,51 @@ public class Map implements Map2D, Serializable{
                 for (int y=p1.getY();y <=p2.getY();y++){
                     double x = p1.getX() +m*(y-p1.getY());
                     setPixel((int) Math.round(x),y,color);
-
                 }
-
-
-
             }
-
-
         }
-
-
-
     }
 
     @Override
     public void drawRect(Pixel2D p1, Pixel2D p2, int color) {
+        int x1 = p1.getX();int x2 = p2.getX();
+        int y1 = p1.getY(); int y2 = p2.getY();
+        if (p1 == null || p2 == null)
+            throw new RuntimeException();
+        if (p1 == p2)
+            setPixel(p1,color);
+
+        else {
+            int minX = Math.min(x1,x2 );
+            int maxX = Math.max(x1,x2);
+            int minY = Math.min(y1,y2);
+            int maxY = Math.max(y1,y2);
+            Map a  = new Map(maxX-minX,maxY-minY,color);
+
+        }
+
 
     }
 
     @Override
     public boolean equals(Object ob) {
         boolean ans = false;
-
+        if (this == ob) {
+            ans = true;
+            return ans;
+        }
+        if(!(ob instanceof Map2D))
+            return ans;
+        Map2D n = (Map2D) ob;
+        if (!this.sameDimensions(n))
+            return ans;
+            for(int i =0;i<this.getWidth();i++){
+                for (int j =0;j<this.getHeight();j++){
+                    if (this.getPixel(i,j) != n.getPixel(i,j))
+                        return ans;
+                }
+            }
+            ans = true;
         return ans;
     }
 	@Override
