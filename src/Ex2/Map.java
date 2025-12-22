@@ -1,6 +1,10 @@
 package Ex2;
 import java.awt.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * This class represents a 2D map (int[w][h]) as a "screen" or a raster matrix or maze over integers.
@@ -80,8 +84,8 @@ public class Map implements Map2D, Serializable{
 		int[][] ans = null;
         if (this.map == null)
             return ans;
-        int w = getWidth();
-        int h = getHeight();
+        int w = this.getWidth();
+        int h = this.getHeight();
         int [] [] copy = new int[w][h];
         for (int i =0; i<copy.length; i++){
             for (int j = 0;j<copy[0].length;j++){
@@ -294,6 +298,30 @@ public class Map implements Map2D, Serializable{
             ans = true;
         return ans;
     }
+    public List<Pixel2D> getNeighbers(Pixel2D p, boolean cyclic){
+        List<Pixel2D> Neighbers = new ArrayList<>();
+        int x = p.getX();
+        int y = p.getY();
+        int w = this.getWidth();
+        int h = this.getHeight();
+        int [] dx = {1,-1,0,0};
+        int [] dy = {0,0,1,-1};
+        for (int i =0;i<4;i++){
+            int nextX = x + dx[i];
+            int nextY = y = dy[i];
+            if (cyclic){
+                nextX = (nextX+w)%w;
+                nextY = (nextY+h)%h;
+                Neighbers.add(new Index2D(nextX,nextY));
+            }
+            else {
+                if ((nextX >= 0) && (nextX < w) && (nextY >= 0) && nextY<h){
+                    Neighbers.add(new Index2D(nextX,nextY));
+                }
+            }
+        }
+        return Neighbers;
+    }
 	@Override
 	/** 
 	 * Fills this map with the new color (new_v) starting from p.
@@ -301,6 +329,10 @@ public class Map implements Map2D, Serializable{
 	 */
 	public int fill(Pixel2D xy, int new_v,  boolean cyclic) {
 		int ans = -1;
+        Queue<Index2D> list = new LinkedList<>();
+
+
+
 
 		return ans;
 	}
