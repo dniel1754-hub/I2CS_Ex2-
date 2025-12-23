@@ -1,10 +1,6 @@
 package Ex2;
-import java.awt.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * This class represents a 2D map (int[w][h]) as a "screen" or a raster matrix or maze over integers.
@@ -49,13 +45,16 @@ public class Map implements Map2D, Serializable{
 
         init(data);
 	}
-	@Override
+
+
+
+    @Override
 	public void init(int w, int h, int v) {
         if (w != 0 && h != 0) {
-            int [] [] array = new int[w][h];
-            for (int i =0;i<array.length;i++){
-                for (int j =0;j<array[0].length;j++){
-                    array[i][j] = v;
+           this.map = new int[w][h];
+            for (int i =0;i< map.length;i++){
+                for (int j =0;j<map[0].length;j++){
+                    this.map[i][j] = v;
 
 
                 }
@@ -68,12 +67,12 @@ public class Map implements Map2D, Serializable{
 	@Override
 	public void init(int[][] arr) {
         if (arr == null || arr.length<1 || arr[0].length< 1){
-            throw new RuntimeException();
+            throw new RuntimeException("Invalid array for init");
         }
-        int [] [] arrCopy = new int[arr.length][arr[0].length];
-        for (int i =0;i<arrCopy.length;i++){
-            for (int j =0;j<arrCopy[0].length;j++){
-                arrCopy[i][j] = arr[i][j];
+        this.map = new int[arr.length][arr[0].length];
+        for (int i =0;i<arr.length;i++){
+            for (int j =0;j<arr[0].length;j++){
+                this.map[i][j] = arr[i][j];
             }
 
         }
@@ -97,7 +96,7 @@ public class Map implements Map2D, Serializable{
 	}
 	@Override
 	public int getWidth() {
-        int ans = -1;
+        int ans = 0;
         if (this.map == null)
             return ans;
 
@@ -106,8 +105,8 @@ public class Map implements Map2D, Serializable{
     }
 	@Override
 	public int getHeight() {
-        int ans = -1;
-        if (this.map == null)
+        int ans = 0;
+        if (this.map == null || this.map[0]==null)
             return ans;
 
         return this.map[0].length;
@@ -146,7 +145,7 @@ public class Map implements Map2D, Serializable{
         int y = p.getY();
         int h = getHeight();
         int w = getWidth();
-        return (x>0 && x<w && y>0 && y>h);
+        return ((x>=0 && x<w) && (y >= 0 && y<h));
     }
 
     @Override
@@ -190,12 +189,24 @@ public class Map implements Map2D, Serializable{
 
     @Override
     public void rescale(double sx, double sy) {
-        if (sx< 0.0 || sy<0.0 ){
-            throw new RuntimeException();
+        if (sx<= 0.0 || sy<=0.0 ){
+            throw new RuntimeException("Invalid array for init");
         }
         int w = (int) (this.getWidth() * sx);
         int h = (int) (this.getHeight() * sy);
+        int newW = Math.min(w,this.getWidth());
+        int newH = Math.min(h,this.getHeight());
+        int[][] copy = this.getMap();
+
         setMap(w,h);
+
+        for (int i =0;i<newW;i++){
+            for (int j=0;j<newH;j++){
+                this.map[i][j] = copy[i][j];
+
+
+            }
+        }
 
 
 
@@ -221,8 +232,8 @@ public class Map implements Map2D, Serializable{
 
     @Override
     public void drawLine(Pixel2D p1, Pixel2D p2, int color) {
-        if (!isInside(p1) || !isInside(p2))
-            throw new RuntimeException();
+        if (!(this.isInside(p1)) || !(this.isInside(p2)))
+            throw new RuntimeException("Invalid array for drawLine");
         if (p2 == p1)
             setPixel(p1,color);
         int dx =Math.abs( p1.getX() - p2.getX());
@@ -261,7 +272,7 @@ public class Map implements Map2D, Serializable{
         int x1 = p1.getX();int x2 = p2.getX();
         int y1 = p1.getY(); int y2 = p2.getY();
         if (p1 == null || p2 == null)
-            throw new RuntimeException();
+            throw new RuntimeException("Invalid array for init");
         if (p1 == p2)
             setPixel(p1,color);
 
@@ -270,7 +281,13 @@ public class Map implements Map2D, Serializable{
             int maxX = Math.max(x1,x2);
             int minY = Math.min(y1,y2);
             int maxY = Math.max(y1,y2);
-            Map a  = new Map(maxX-minX,maxY-minY,color);
+            for (int i =minX;i<=maxX;i++){
+                for (int j=minY;j<=maxY;j++){
+                    setPixel(i,j,color);
+                }
+
+            }
+
 
         }
 
@@ -298,8 +315,8 @@ public class Map implements Map2D, Serializable{
             ans = true;
         return ans;
     }
-    public List<Pixel2D> getNeighbers(Pixel2D p, boolean cyclic){
-        List<Pixel2D> Neighbers = new ArrayList<>();
+    public Queue<Pixel2D> getNeighbers(Pixel2D p, boolean cyclic){
+        Queue<Pixel2D> Neighbers = new LinkedList<>();
         int x = p.getX();
         int y = p.getY();
         int w = this.getWidth();
@@ -308,7 +325,7 @@ public class Map implements Map2D, Serializable{
         int [] dy = {0,0,1,-1};
         for (int i =0;i<4;i++){
             int nextX = x + dx[i];
-            int nextY = y = dy[i];
+            int nextY = y + dy[i];
             if (cyclic){
                 nextX = (nextX+w)%w;
                 nextY = (nextY+h)%h;
@@ -328,13 +345,26 @@ public class Map implements Map2D, Serializable{
 	 * https://en.wikipedia.org/wiki/Flood_fill
 	 */
 	public int fill(Pixel2D xy, int new_v,  boolean cyclic) {
-		int ans = -1;
-        Queue<Index2D> list = new LinkedList<>();
+		int Pcolor = getPixel(xy);
+        if (Pcolor == new_v)
+            return 0;
+        Queue<Pixel2D> list = new LinkedList<>();
+        list.add(xy);
+        setPixel(xy,new_v);
+        int count = 1;
+        while (!list.isEmpty()){
+            Pixel2D currunt = list.poll();
+            for (Pixel2D neighber:getNeighbers(currunt,cyclic)){
+                if (getPixel(neighber) == Pcolor){
+                    setPixel(neighber,new_v);
+                    list.add(neighber);
+                    count++;
+                }
 
+            }
 
-
-
-		return ans;
+        }
+		return count;
 	}
 
 	@Override
@@ -344,12 +374,50 @@ public class Map implements Map2D, Serializable{
 	 */
 	public Pixel2D[] shortestPath(Pixel2D p1, Pixel2D p2, int obsColor, boolean cyclic) {
 		Pixel2D[] ans = null;  // the result.
+        Map2D copy = allDistance(p1,obsColor,cyclic);
+        if (copy.getPixel(p2)<0 || !(isInside(p2)) || !(isInside(p1)))
+            return ans;
+        int anslen = copy.getPixel(p2) +1;
+        ans =new Pixel2D[anslen];
+        Pixel2D cur = p2;
+
+        for (int i = anslen-1;i>0;i--){
+            ans[i] = cur;
+            for (Pixel2D neighber:getNeighbers(cur,cyclic)) {
+                if (i-1 == copy.getPixel(cur)) {
+                    cur = neighber;
+                    break;
+
+
+                }
+            }
+        }
 
 		return ans;
 	}
+
     @Override
     public Map2D allDistance(Pixel2D start, int obsColor, boolean cyclic) {
-        Map2D ans = null;  // the result.
+        Map2D ans = null;// the result.
+        if (this.getPixel(start) == obsColor || !(this.isInside(start)) )
+            return ans;
+
+        ans = new Map(this.getWidth(),this.getHeight(),-1);
+        ans.setPixel(start,0);
+        Queue<Pixel2D> List = new LinkedList<>();
+        List.add(start);
+        while (!List.isEmpty()) {
+            Pixel2D cur = List.poll();
+            int distocur = ans.getPixel(cur);
+            for (Pixel2D neighber : getNeighbers(cur, cyclic)) {
+                if (this.getPixel(neighber) == obsColor)
+                    continue;
+                if (ans.getPixel(neighber) == -1) {
+                    ans.setPixel(neighber, distocur + 1);
+                    List.add(neighber);
+                }
+            }
+        }
 
         return ans;
     }

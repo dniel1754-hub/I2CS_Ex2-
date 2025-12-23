@@ -1,22 +1,362 @@
 package Ex2;
 
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+
+import java.util.Queue;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 /**
  * Intro2CS, 2026A, this is a very
  */
+
 class MapTest {
-    /**
-     */
+    private Map a;
+        private Map2D _map;
+        private final int DEFAULT_VAL = 0;
+
+        @BeforeEach
+        void setUp() {
+            _map = new Map(0); // החלף בשם המחלקה שלך
+        }
+
+        @Test
+        void testInitDimensions() {
+            _map.init(10, 20, 5);
+            assertEquals(10, _map.getWidth());
+            assertEquals(20, _map.getHeight());
+            assertEquals(5, _map.getPixel(0, 0));
+            assertEquals(5, _map.getPixel(9, 19));
+        }
+
+        @Test
+        void testInitFromArrayAndDeepCopy() {
+            int[][] arr = {
+                    {1, 2, 3},
+                    {4, 5, 6}
+            };
+            _map.init(arr);
+            assertEquals(2, _map.getWidth());
+            assertEquals(3, _map.getHeight());
+
+            // בדיקת Deep Copy: שינוי במערך המקור לא אמור להשפיע על המפה
+            arr[0][0] = 99;
+            assertNotEquals(99, _map.getPixel(0, 0));
+            assertEquals(1, _map.getPixel(0, 0));
+        }
+
+        @Test
+        void testGetMapDeepCopy() {
+            _map.init(5, 5, 10);
+            int[][] copy = _map.getMap();
+            copy[0][0] = 50;
+            // שינוי בהעתק לא אמור לשנות את המפה הפנימית
+            assertNotEquals(50, _map.getPixel(0, 0));
+        }
+
+        @Test
+        void testSetAndGetPixel() {
+            _map.init(10, 10, 0);
+            Pixel2D p = new Index2D(3, 4);
+            _map.setPixel(3, 4, 7);
+            assertEquals(7, _map.getPixel(p));
+
+            _map.setPixel(p, 9);
+            assertEquals(9, _map.getPixel(3, 4));
+        }
+
+        @Test
+        void testIsInside() {
+            _map.init(10, 10, 0);
+            assertTrue(_map.isInside(new Index2D(0, 0)));
+            assertTrue(_map.isInside(new Index2D(9, 9)));
+            assertFalse(_map.isInside(new Index2D(10, 5)));
+            assertFalse(_map.isInside(new Index2D(-1, 0)));
+        }
+
+        @Test
+        void testAddMap2D() {
+            _map.init(2, 2, 10);
+            Map2D other = new Map(0);
+            other.init(2, 2, 5);
+
+            _map.addMap2D(other);
+            assertEquals(15, _map.getPixel(0, 0));
+
+            // בדיקה שלא קורה כלום אם הממדים שונים
+            Map2D wrongDim = new Map(0);
+            wrongDim.init(3, 3, 100);
+            _map.addMap2D(wrongDim);
+            assertEquals(15, _map.getPixel(0, 0)); // נשאר אותו דבר
+        }
+
+        @Test
+        void testMul() {
+            _map.init(2, 2, 10);
+            _map.mul(0.5);
+            assertEquals(5, _map.getPixel(0, 0));
+            _map.mul(2.1); // 5 * 2.1 = 10.5 -> floor/cast to 10
+            assertEquals(10, _map.getPixel(1, 1));
+        }
+
+        @Test
+        void testRescale() {
+            _map.init(100, 200, 1);
+            _map.rescale(1.2, 0.5);
+            assertEquals(120, _map.getWidth());
+            assertEquals(100, _map.getHeight());
+        }
+
+        @Test
+        void testDrawRect() {
+            _map.init(10, 10, 0);
+            Pixel2D p1 = new Index2D(2, 2);
+            Pixel2D p2 = new Index2D(4, 4);
+            int color = 5;
+            _map.drawRect(p1, p2, color);
+
+            assertEquals(color, _map.getPixel(2, 2));
+            assertEquals(color, _map.getPixel(4, 4));
+            assertEquals(color, _map.getPixel(2, 4));
+            assertEquals(0, _map.getPixel(1, 1)); // מחוץ למלבן
+        }
+
+        @Test
+        void testDrawCircle() {
+            _map.init(20, 20, 0);
+            Pixel2D center = new Index2D(10, 10);
+            double rad = 3.5;
+            int color = 7;
+            _map.drawCircle(center, rad, color);
+
+            assertTrue(_map.getPixel(10, 10) == color); // המרכז
+            assertTrue(_map.getPixel(13, 10) == color); // מרחק 3 (בתוך הרדיוס)
+            assertFalse(_map.getPixel(15, 10) == color); // מרחק 5 (מחוץ לרדיוס)
+        }
+
+        @Test
+        void testDrawLine() {
+            _map.init(10, 10, 0);
+            Pixel2D p1 = new Index2D(1, 1);
+            Pixel2D p2 = new Index2D(5, 1); // קו אופקי
+            int color = 3;
+            _map.drawLine(p1, p2, color);
+
+            for (int x = 1; x <= 5; x++) {
+                assertEquals(color, _map.getPixel(x, 1), "Pixel at " + x + ",1 should be colored");
+            }
+            assertEquals(0, _map.getPixel(1, 2));
+        }
+
+        @Test
+        void testEquals1() {
+            _map.init(3, 3, 1);
+            Map2D other = new Map(0);
+            other.init(3, 3, 1);
+
+            assertTrue(_map.equals(other));
+
+            other.setPixel(0, 0, 9);
+            assertFalse(_map.equals(other));
+        }
+
+
+
+
+
+    // tests for getneighbors function
+    @Test
+    void testGetNeighborsMiddle() {
+        Map m = new Map(10, 10, 0);
+        Pixel2D p = new Index2D(5, 5);
+        // במרכז המפה, תמיד צריכים להיות 4 שכנים
+        Queue<Pixel2D> neighbors = m.getNeighbers(p, false);
+        assertEquals(4, neighbors.size(), "שכן במרכז המפה חייב להחזיר 4 שכנים");
+    }
+    @Test
+    void simpleFillTest() {
+        // 1. יצירת מפה של 3X3 מלאה ב-0
+        Map m = new Map(3, 3, 0);
+
+        // 2. צביעה של המרכז
+        Pixel2D start = new Index2D(1, 1);
+        int count = m.fill(start, 5, false);
+
+        // 3. בדיקה: האם נצבעו 9 תאים? האם הצבע במרכז הוא 5?
+        assertEquals(9, count, "כל המפה אמורה להיצבע");
+        assertEquals(5, m.getPixel(1, 1), "הצבע בנקודת ההתחלה חייב להשתנות");
+        assertEquals(5, m.getPixel(0, 0), "הצבע בפינה חייב להשתנות");
+    }
+
+    @Test
+    void testGetNeighborsCornerNonCyclic() {
+        Map m = new Map(10, 10, 0);
+        Pixel2D p = new Index2D(0, 0);
+        // בפינה ללא מחזוריות, יש רק 2 שכנים (ימינה ולמטה)
+        Queue<Pixel2D> neighbors = m.getNeighbers(p, false);
+        assertEquals(2, neighbors.size(), "בפינה ללא מחזוריות צריכים להיות רק 2 שכנים");
+    }
+
+    @Test
+    void testGetNeighborsCornerCyclic() {
+        Map m = new Map(10, 10, 0);
+        Pixel2D p = new Index2D(0, 0);
+        // בפינה עם מחזוריות, תמיד צריכים להיות 4 שכנים (חלקם "עוטפים" לצד השני)
+        Queue<Pixel2D> neighbors = m.getNeighbers(p, true);
+        assertEquals(4, neighbors.size(), "במפה מחזורית תמיד צריכים להיות 4 שכנים");
+    }
+    // test for rescale
+    @BeforeEach
+     public void setUp2() {
+        // אתחול מפה בגודל 10x10 עם ערכים כלשהם
+         a = new Map(10, 10, 5);
+
+
+    }
+
+    @Test
+    void testDownScale() {
+        // הקטנה בחצי - אמור להיות 5x5
+        a.rescale(0.5, 0.5);
+        assertEquals(5, a.getWidth());
+        assertEquals(5, a.getHeight());
+        // בדיקה שהערכים שנשארו אכן הועתקו נכון
+        assertEquals(5, a.getMap()[0][0]);
+    }
+
+    @Test
+    void testUpScale() {
+        // הגדלה פי 2 - אמור להיות 20x20
+        a.rescale(2.0, 2.0);
+        assertEquals(20, a.getWidth());
+        assertEquals(20, a.getHeight());
+        // הפינה המקורית צריכה להישאר 5, השאר יהיה 0 (ברירת מחדל של int)
+        assertEquals(5, a.getMap()[0][0]);
+        assertEquals(0, a.getMap()[15][15]);
+    }
+
+    @Test
+    void testInvalidScale() {
+        // בדיקה שזריקת השגיאה עובדת על ערכים שליליים
+        assertThrows(RuntimeException.class, () -> {
+            a.rescale(-1.0, 5.0);
+        });
+    }
+
+    // --- טסטים לפונקציה המרכזית fill ---
+
+    @Test
+    void testFillSimple() {
+        Map m = new Map(5, 5, 0); // מפה של 5x5 מאופסת
+        Pixel2D p = new Index2D(2, 2);
+        int changed = m.fill(p, 1, false);
+
+        // המפה כולה הייתה 0, לכן כל 25 הפיקסלים צריכים להשתנות ל-1
+        assertEquals(25, changed);
+        assertEquals(1, m.getPixel(0, 0));
+        assertEquals(1, m.getPixel(4, 4));
+    }
+
+    @Test
+    void testFillWithBoundary() {
+        Map m = new Map(5, 5, 0);
+        // ניצור "קיר" של 1-ים שיחצה את המפה
+        m.drawLine(new Index2D(2, 0), new Index2D(2, 4), 1);
+
+        // נבצע fill בנקודה (0,0) עם צבע 2. זה אמור לצבוע רק צד אחד של הקיר.
+        // צד אחד הוא 2 שורות (0 ו-1) כפול 5 פיקסלים = 10
+        int changed = m.fill(new Index2D(0, 0), 2, false);
+        assertEquals(10, changed);
+        assertEquals(2, m.getPixel(0, 0));
+        assertEquals(1, m.getPixel(2, 0)); // הקיר נשאר 1
+        assertEquals(0, m.getPixel(3, 0)); // הצד השני נשאר 0
+    }
+
+    @Test
+    void testFillSameColor() {
+        Map m = new Map(5, 5, 7);
+        Pixel2D p = new Index2D(1, 1);
+        // ניסיון לצבוע בערך שכבר קיים
+        int changed = m.fill(p, 7, false);
+        assertEquals(0, changed, "צביעה באותו צבע צריכה להחזיר 0 שינויים");
+    }
+    // test for allDistance function
+    @Test
+    void testSimpleDistances() {
+        // יצירת מפה 3x3 שכולה בצבע 0
+        Map m = new Map(3, 3, 0);
+        Pixel2D start = new Index2D(0, 0);
+
+        // חישוב מרחקים (אין מכשולים, צבע המכשול הוא 1)
+        Map2D res = m.allDistance(start, 1, false);
+
+        // בדיקת מרחקים צפויים:
+        // 0 1 2
+        // 1 2 3
+        // 2 3 4
+        assertEquals(0, res.getPixel(0, 0));
+        assertEquals(2, res.getPixel(2, 0)); // מרחק לנקודה (2,0)
+        assertEquals(4, res.getPixel(2, 2)); // הנקודה הכי רחוקה
+    }
+    @Test
+    void testWithObstacle() {
+        Map m = new Map(3, 3, 0);
+        // נשים מכשול (צבע 1) בנקודה (1,0) ובנקודה (1,1)
+        m.setPixel(1, 0, 1);
+        m.setPixel(1, 1, 1);
+
+        Pixel2D start = new Index2D(0, 0);
+        Map2D res = m.allDistance(start, 1, false);
+
+        // בנקודת המכשול צריך להיות 1- (לא נגיש/מכשול)
+        assertEquals(-1, res.getPixel(1, 0));
+
+        // הדרך ל-(2,0) עכשיו ארוכה יותר כי צריך לעקוף מלמטה
+        // מסלול אפשרי: (0,0) -> (0,1) -> (0,2) -> (1,2) -> (2,2) -> (2,1) -> (2,0)
+        // המרחק אמור להיות 6
+        assertEquals(6, res.getPixel(2, 0));
+    }
+    @Test
+    void testCyclicDistances() {
+        Map m = new Map(10, 10, 0);
+        Pixel2D start = new Index2D(0, 0);
+
+        // נבדוק מרחק לנקודה (9,0) - שהיא הקצה השני של ציר ה-X
+        Map2D res = m.allDistance(start, 1, true); // cyclic = true
+
+        // במצב רגיל המרחק הוא 9. במצב מחזורי המרחק הוא רק 1!
+        assertEquals(1, res.getPixel(9, 0));
+
+        // באותו אופן לנקודה (0,9)
+        assertEquals(1, res.getPixel(0, 9));
+    }
+    @Test
+    void testUnreachable() {
+        Map m = new Map(5, 5, 0);
+        // נבנה ריבוע של מכשולים (צבע 1) מסביב למרכז (2,2)
+        m.setPixel(2, 1, 1);
+        m.setPixel(1, 2, 1);
+        m.setPixel(3, 2, 1);
+        m.setPixel(2, 3, 1);
+
+        Pixel2D start = new Index2D(0, 0);
+        Map2D res = m.allDistance(start, 1, false);
+
+        // הנקודה (2,2) חסומה מכל כיוון, לכן המרחק אליה חייב להיות 1-
+        assertEquals(-1, res.getPixel(2, 2));
+    }
+
     private final int[][] _map_3_3 = {{0,1,0}, {1,0,1}, {0,1,0}};
     private Map2D _m0, _m1, _m3_3;
     @BeforeEach
     public void setuo() {
+
         _m3_3 = new Map(_map_3_3);
+        _m1 = new Map(500);
+        _m0 = new Map(500);
     }
     @Test
     @Timeout(value = 1, unit = SECONDS)
