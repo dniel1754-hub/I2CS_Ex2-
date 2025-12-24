@@ -2,6 +2,7 @@ package Ex2;
 
 import org.junit.jupiter.api.BeforeEach;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Intro2CS, 2026A, this is a very
  */
+
 
 class MapTest {
     private Map a;
@@ -349,6 +351,107 @@ class MapTest {
         assertEquals(-1, res.getPixel(2, 2));
     }
 
+
+        private Map2D map;
+        private final int OBS = 1; // צבע המכשול
+        private final int FREE = 0; // שטח פתוח
+
+        @Test
+        void testSimplePath() {
+            // מפה ריקה בגודל 5x5
+            map = new Map(5, 5, FREE);
+            Pixel2D p1 = new Index2D(0, 0);
+            Pixel2D p2 = new Index2D(2, 2);
+
+            Pixel2D[] path = map.shortestPath(p1, p2, OBS, false);
+
+            // המרחק הקצר ביותר בין (0,0) ל-(2,2) הוא 4 צעדים
+            // לכן המערך צריך להיות באורך 5 (כולל נקודת ההתחלה)
+            assertNotNull(path, "המסלול לא אמור להיות null");
+            assertEquals(5, path.length);
+            assertEquals(p1, path[0]);
+            assertEquals(p2, path[path.length - 1]);
+            assertTrue(isValidPath(path, OBS, false), "המסלול חייב להיות רציף וללא מכשולים");
+        }
+
+        @Test
+        void testPathWithObstacles() {
+            map = new Map(5, 5, FREE);
+            // יצירת "קיר" שחוסם את הדרך הישירה בין (0,2) ל-(4,2)
+            map.setPixel(2, 1, OBS);
+            map.setPixel(2, 2, OBS);
+            map.setPixel(2, 3, OBS);
+
+            Pixel2D p1 = new Index2D(0, 2);
+            Pixel2D p2 = new Index2D(4, 2);
+
+            Pixel2D[] path = map.shortestPath(p1, p2, OBS, false);
+
+            assertNotNull(path);
+            // בדיקה שהמסלול לא עובר דרך הקיר
+            for (Pixel2D p : path) {
+                assertNotEquals(OBS, map.getPixel(p), "המסלול עובר דרך מכשול!");
+            }
+            assertTrue(isValidPath(path, OBS, false));
+        }
+
+        @Test
+        void testCyclicPath() {
+            // מפה 10x10, מעבר מקצה לקצה
+            map = new Map(10, 10, FREE);
+            Pixel2D p1 = new Index2D(0, 5);
+            Pixel2D p2 = new Index2D(9, 5);
+
+            // במצב רגיל המרחק הוא 9. במצב מחזורי המרחק הוא 1 (קפיצה אחת שמאלה)
+            Pixel2D[] path = map.shortestPath(p1, p2, OBS, true);
+
+            assertNotNull(path);
+            assertEquals(2, path.length, "במפה מחזורית המסלול אמור להיות באורך 2");
+            assertEquals(p1, path[0]);
+            assertEquals(p2, path[1]);
+        }
+
+        @Test
+        void testNoPath() {
+            map = new Map(3, 3, FREE);
+            // חסימת היעד (2,2) מכל הכיוונים
+            map.setPixel(1, 2, OBS);
+            map.setPixel(2, 1, OBS);
+
+            Pixel2D p1 = new Index2D(0, 0);
+            Pixel2D p2 = new Index2D(2, 2);
+
+            Pixel2D[] path = map.shortestPath(p1, p2, OBS, false);
+
+            // לא ניתן להגיע, הפונקציה צריכה להחזיר null לפי הדרישות
+            assertNull(path, "כשאין מסלול חוקי התוצאה צריכה להיות null");
+        }
+
+        // מתודת עזר לבדיקה שהמסלול תקין ורציף
+        private boolean isValidPath(Pixel2D[] path, int obsColor, boolean cyclic) {
+            if (path == null || path.length == 0) return false;
+            for (int i = 0; i < path.length - 1; i++) {
+                if (map.getPixel(path[i]) == obsColor) return false;
+                // בדיקה שכל איבר הוא שכן של האיבר הבא
+                if (!isNeighbor(path[i], path[i+1], cyclic)) return false;
+            }
+            return map.getPixel(path[path.length-1]) != obsColor;
+        }
+
+        private boolean isNeighbor(Pixel2D a, Pixel2D b, boolean cyclic) {
+            int dx = Math.abs(a.getX() - b.getX());
+            int dy = Math.abs(a.getY() - b.getY());
+            if (!cyclic) return (dx + dy == 1);
+
+            // במצב מחזורי, מרחק של width-1 נחשב גם הוא לשכנות (מרחק 1 בפועל)
+            int w = map.getWidth();
+            int h = map.getHeight();
+            if (dx == w - 1) dx = 1;
+            if (dy == h - 1) dy = 1;
+            return (dx + dy == 1);
+
+    }
+
     private final int[][] _map_3_3 = {{0,1,0}, {1,0,1}, {0,1,0}};
     private Map2D _m0, _m1, _m3_3;
     @BeforeEach
@@ -383,3 +486,4 @@ class MapTest {
         assertEquals(_m0,_m1);
     }
 }
+

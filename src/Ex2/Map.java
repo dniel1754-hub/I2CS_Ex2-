@@ -381,10 +381,12 @@ public class Map implements Map2D, Serializable{
         ans =new Pixel2D[anslen];
         Pixel2D cur = p2;
 
-        for (int i = anslen-1;i>0;i--){
+        for (int i = anslen-1;i>=0;i--){
             ans[i] = cur;
+            if (i ==0)
+                break;
             for (Pixel2D neighber:getNeighbers(cur,cyclic)) {
-                if (i-1 == copy.getPixel(cur)) {
+                if (i-1 == copy.getPixel(neighber)) {
                     cur = neighber;
                     break;
 
