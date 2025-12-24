@@ -24,7 +24,7 @@ class MapTest {
         void setUp() {
             _map = new Map(0); // החלף בשם המחלקה שלך
         }
-
+    /** Tests that the map is initialized correctly with given dimensions and initial value. */
         @Test
         void testInitDimensions() {
             _map.init(10, 20, 5);
@@ -33,7 +33,7 @@ class MapTest {
             assertEquals(5, _map.getPixel(0, 0));
             assertEquals(5, _map.getPixel(9, 19));
         }
-
+    /** Verifies map creation from a 2D array and ensures a Deep Copy is performed. */
         @Test
         void testInitFromArrayAndDeepCopy() {
             int[][] arr = {
@@ -43,13 +43,11 @@ class MapTest {
             _map.init(arr);
             assertEquals(2, _map.getWidth());
             assertEquals(3, _map.getHeight());
-
-            // בדיקת Deep Copy: שינוי במערך המקור לא אמור להשפיע על המפה
             arr[0][0] = 99;
             assertNotEquals(99, _map.getPixel(0, 0));
             assertEquals(1, _map.getPixel(0, 0));
         }
-
+    /** Ensures that the array returned by getMap is a copy and does not modify the original map. */
         @Test
         void testGetMapDeepCopy() {
             _map.init(5, 5, 10);
@@ -58,7 +56,7 @@ class MapTest {
             // שינוי בהעתק לא אמור לשנות את המפה הפנימית
             assertNotEquals(50, _map.getPixel(0, 0));
         }
-
+    /** Tests getting and setting pixel values using coordinates and Pixel2D objects. */
         @Test
         void testSetAndGetPixel() {
             _map.init(10, 10, 0);
@@ -69,7 +67,7 @@ class MapTest {
             _map.setPixel(p, 9);
             assertEquals(9, _map.getPixel(3, 4));
         }
-
+    /** Checks if coordinates are correctly identified as being inside or outside map boundaries. */
         @Test
         void testIsInside() {
             _map.init(10, 10, 0);
@@ -78,7 +76,7 @@ class MapTest {
             assertFalse(_map.isInside(new Index2D(10, 5)));
             assertFalse(_map.isInside(new Index2D(-1, 0)));
         }
-
+    /** Tests the addition of another Map2D's values to the current map. */
         @Test
         void testAddMap2D() {
             _map.init(2, 2, 10);
@@ -94,7 +92,7 @@ class MapTest {
             _map.addMap2D(wrongDim);
             assertEquals(15, _map.getPixel(0, 0)); // נשאר אותו דבר
         }
-
+    /** Tests multiplying all map pixels by a scalar value. */
         @Test
         void testMul() {
             _map.init(2, 2, 10);
@@ -103,7 +101,7 @@ class MapTest {
             _map.mul(2.1); // 5 * 2.1 = 10.5 -> floor/cast to 10
             assertEquals(10, _map.getPixel(1, 1));
         }
-
+    /** Verifies that the map dimensions are updated correctly after a rescale operation. */
         @Test
         void testRescale() {
             _map.init(100, 200, 1);
@@ -111,7 +109,7 @@ class MapTest {
             assertEquals(120, _map.getWidth());
             assertEquals(100, _map.getHeight());
         }
-
+    /** Tests drawing a filled rectangle between two points. */
         @Test
         void testDrawRect() {
             _map.init(10, 10, 0);
@@ -125,7 +123,7 @@ class MapTest {
             assertEquals(color, _map.getPixel(2, 4));
             assertEquals(0, _map.getPixel(1, 1)); // מחוץ למלבן
         }
-
+    /** Tests drawing a filled circle based on center point and radius. */
         @Test
         void testDrawCircle() {
             _map.init(20, 20, 0);
@@ -138,7 +136,7 @@ class MapTest {
             assertTrue(_map.getPixel(13, 10) == color); // מרחק 3 (בתוך הרדיוס)
             assertFalse(_map.getPixel(15, 10) == color); // מרחק 5 (מחוץ לרדיוס)
         }
-
+    /** Tests drawing a line between two points and verifies intermediate pixels. */
         @Test
         void testDrawLine() {
             _map.init(10, 10, 0);
@@ -152,7 +150,7 @@ class MapTest {
             }
             assertEquals(0, _map.getPixel(1, 2));
         }
-
+    /** Verifies the equality of two maps with identical content and dimensions. */
         @Test
         void testEquals1() {
             _map.init(3, 3, 1);
@@ -170,6 +168,7 @@ class MapTest {
 
 
     // tests for getneighbors function
+    /** Ensures a pixel in the middle of the map has 4 neighbors. */
     @Test
     void testGetNeighborsMiddle() {
         Map m = new Map(10, 10, 0);
@@ -178,6 +177,7 @@ class MapTest {
         Queue<Pixel2D> neighbors = m.getNeighbers(p, false);
         assertEquals(4, neighbors.size(), "שכן במרכז המפה חייב להחזיר 4 שכנים");
     }
+    /** Tests the simple flood fill algorithm. */
     @Test
     void simpleFillTest() {
         // 1. יצירת מפה של 3X3 מלאה ב-0
@@ -192,7 +192,7 @@ class MapTest {
         assertEquals(5, m.getPixel(1, 1), "הצבע בנקודת ההתחלה חייב להשתנות");
         assertEquals(5, m.getPixel(0, 0), "הצבע בפינה חייב להשתנות");
     }
-
+    /** Verifies that a corner pixel in a non-cyclic map has only 2 neighbors. */
     @Test
     void testGetNeighborsCornerNonCyclic() {
         Map m = new Map(10, 10, 0);
@@ -201,7 +201,7 @@ class MapTest {
         Queue<Pixel2D> neighbors = m.getNeighbers(p, false);
         assertEquals(2, neighbors.size(), "בפינה ללא מחזוריות צריכים להיות רק 2 שכנים");
     }
-
+    /** Verifies that a corner pixel in a cyclic map has 4 neighbors due to wrap-around. */
     @Test
     void testGetNeighborsCornerCyclic() {
         Map m = new Map(10, 10, 0);
@@ -249,7 +249,7 @@ class MapTest {
     }
 
     // --- טסטים לפונקציה המרכזית fill ---
-
+    /** Tests the simple flood fill algorithm on an empty map. */
     @Test
     void testFillSimple() {
         Map m = new Map(5, 5, 0); // מפה של 5x5 מאופסת
@@ -261,7 +261,7 @@ class MapTest {
         assertEquals(1, m.getPixel(0, 0));
         assertEquals(1, m.getPixel(4, 4));
     }
-
+    /** Verifies that flood fill respects boundaries created by lines. */
     @Test
     void testFillWithBoundary() {
         Map m = new Map(5, 5, 0);
@@ -276,7 +276,7 @@ class MapTest {
         assertEquals(1, m.getPixel(2, 0)); // הקיר נשאר 1
         assertEquals(0, m.getPixel(3, 0)); // הצד השני נשאר 0
     }
-
+    /** Ensures fill returns zero changes when filling with the same color. */
     @Test
     void testFillSameColor() {
         Map m = new Map(5, 5, 7);
@@ -286,6 +286,7 @@ class MapTest {
         assertEquals(0, changed, "צביעה באותו צבע צריכה להחזיר 0 שינויים");
     }
     // test for allDistance function
+    /** Tests distance map calculation from a start point in an empty grid. */
     @Test
     void testSimpleDistances() {
         // יצירת מפה 3x3 שכולה בצבע 0
@@ -303,6 +304,7 @@ class MapTest {
         assertEquals(2, res.getPixel(2, 0)); // מרחק לנקודה (2,0)
         assertEquals(4, res.getPixel(2, 2)); // הנקודה הכי רחוקה
     }
+    /** Tests that distance calculation correctly bypasses obstacles. */
     @Test
     void testWithObstacle() {
         Map m = new Map(3, 3, 0);
@@ -321,6 +323,7 @@ class MapTest {
         // המרחק אמור להיות 6
         assertEquals(6, res.getPixel(2, 0));
     }
+    /** Verifies distance calculation in a cyclic map environment. */
     @Test
     void testCyclicDistances() {
         Map m = new Map(10, 10, 0);
@@ -335,6 +338,7 @@ class MapTest {
         // באותו אופן לנקודה (0,9)
         assertEquals(1, res.getPixel(0, 9));
     }
+    /** Checks that unreachable areas are marked correctly with -1. */
     @Test
     void testUnreachable() {
         Map m = new Map(5, 5, 0);
@@ -355,7 +359,7 @@ class MapTest {
         private Map2D map;
         private final int OBS = 1; // צבע המכשול
         private final int FREE = 0; // שטח פתוח
-
+    /** Verifies the shortest path calculation between two points in an empty map. */
         @Test
         void testSimplePath() {
             // מפה ריקה בגודל 5x5
@@ -373,7 +377,7 @@ class MapTest {
             assertEquals(p2, path[path.length - 1]);
             assertTrue(isValidPath(path, OBS, false), "המסלול חייב להיות רציף וללא מכשולים");
         }
-
+    /** Verifies that the shortest path successfully navigates around obstacles. */
         @Test
         void testPathWithObstacles() {
             map = new Map(5, 5, FREE);
@@ -394,7 +398,7 @@ class MapTest {
             }
             assertTrue(isValidPath(path, OBS, false));
         }
-
+    /** Tests that the shortest path utilizes map cyclicity to find a faster route. */
         @Test
         void testCyclicPath() {
             // מפה 10x10, מעבר מקצה לקצה
@@ -410,7 +414,7 @@ class MapTest {
             assertEquals(p1, path[0]);
             assertEquals(p2, path[1]);
         }
-
+    /** Ensures the pathfinding function returns null when no valid path exists. */
         @Test
         void testNoPath() {
             map = new Map(3, 3, FREE);
