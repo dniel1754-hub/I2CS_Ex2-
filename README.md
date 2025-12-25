@@ -1,3 +1,4 @@
+<img width="1411" height="1006" alt="צילום מסך 2025-12-25 154418" src="https://github.com/user-attachments/assets/2612668e-6fcb-4699-bb87-5339120a2cc7" />
 # Ex2 - Map2D Analysis and Visualization
 
 ## Project Overview
@@ -21,4 +22,5 @@ This project implements a grid-based map analysis system. It provides tools for 
 *adding a photo of the output.*
 
 ## Authors
-- Daniel REUVEN - 212750947
+- Daniel REUVEN - 212750947<img width="1411" height="1006" alt="צילום מסך 2025-12-25 154418" src="https://github.com/user-attachments/assets/5483a63c-733f-44c4-9bd9-0c85763df1cf" />
+
