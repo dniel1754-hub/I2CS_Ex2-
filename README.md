@@ -1,17 +1,7 @@
-<img width="1411" height="1006" alt="צילום מסך 2025-12-25 154418" src="https://github.com/user-attachments/assets/2612668e-6fcb-4699-bb87-5339120a2cc7" />
-# Ex2 - Map2D Analysis and Visualization
+Map Class Overview
+This class implements the Map2D interface, representing a 2D grid (raster matrix) of integers that can function as a canvas, a map, or a maze.
 
-## Project Overview
-This project implements a grid-based map analysis system. It provides tools for calculating distances, finding shortest paths between points, and performing area fills, while supporting both standard and cyclic (wrap-around) map behaviors.
-
-## Features
-- **Map Representation:** Efficient 2D array-based map implementation.
-- **BFS Algorithms:** - `allDistance`: Calculates the shortest distance from a start point to all reachable areas using Breadth-First Search.
-  - `shortestPath`: Computes the actual path between two pixels.
-- ** Fill:** A classic algorithm to fill connected areas with a new color.
-- **GUI:** Visual representation of the map and calculated paths using the `StdDraw` library.
-- **File I/O:** Save and load maps from simple text files.
-- Initialization & Management
+Initialization & Management
 Map(w, h, v) / init: Initializes a map with specified width and height, filling every pixel with a default value.
 
 getMap: Returns a deep copy of the underlying 2D integer array.
@@ -50,15 +40,4 @@ allDistance: Calculates a distance map where each pixel represents its shortest 
 
 shortestPath: Computes the shortest path between two pixels as an array of points, utilizing a BFS-based approach.
 
-## How to Run
-1. Ensure you have the `StdDraw` library in your classpath.
-2. Run the `Ex2_GUI` class to visualize maps.
-3. Use `MapTest` to run the suite of JUnit tests.
-
-## Visualizations
-![Map Visualization](images/map_example.png)
-*adding a photo of the output.*
-
-## Authors
-- Daniel REUVEN - 212750947<img width="1411" height="1006" alt="צילום מסך 2025-12-25 154418" src="https://github.com/user-attachments/assets/5483a63c-733f-44c4-9bd9-0c85763df1cf" />
-
+האם תרצה שאוסיף הסבר על אלגוריתם ה-BFS הספציפי שהשתמשת בו ב-shortestPath?
